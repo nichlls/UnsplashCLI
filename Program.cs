@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using UnsplashCLI.Data;
 using UnsplashCLI.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -46,12 +47,3 @@ app.MapPut(
 );
 
 app.Run();
-
-// Setup database context
-public class PhotoDb : DbContext
-{
-    public PhotoDb(DbContextOptions<PhotoDb> options)
-        : base(options) { }
-
-    public DbSet<Photo> Photos { get; set; }
-}
