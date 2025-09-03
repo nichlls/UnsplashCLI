@@ -1,0 +1,6 @@
+@UnsplashCLI_HostAddress = http://localhost:5287
+
+GET {{UnsplashCLI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
