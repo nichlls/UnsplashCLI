@@ -39,10 +39,25 @@ app.MapPut(
     "/photo",
     async (PhotoDb db, Photo photo) =>
     {
-        await db.AddAsync(photo);
+        await db.Photos.AddAsync(photo);
         await db.SaveChangesAsync();
 
         return Results.Ok($"Uploaded: {photo}");
+    }
+);
+app.MapDelete(
+    "/photo",
+    async (PhotoDb db, int id) =>
+    {
+        var photo = await db.Photos.FindAsync(id);
+        if (photo == null)
+        {
+            return Results.NotFound($"Photo with ID {id} not found.");
+        }
+
+        db.Photos.Remove(photo);
+        await db.SaveChangesAsync();
+        return Results.Ok($"Deleted photo with ID {id}");
     }
 );
 
