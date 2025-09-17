@@ -1,17 +1,31 @@
 using Microsoft.EntityFrameworkCore;
 using UnsplashCLI.Data;
-using UnsplashCLI.Models;
+using UnsplashCLI.Endpoints;
+using UnsplashCLI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new() { Title = "Unsplash CLI API", Version = "v1" });
+});
 
 builder.Services.AddDbContext<PhotoDb>(option =>
     option.UseNpgsql(builder.Configuration.GetConnectionString("Postgres"))
 );
+
+builder.Services.AddHttpClient(
+    "Unsplash",
+    client =>
+    {
+        client.BaseAddress = new Uri("https://api.unsplash.com/");
+        client.DefaultRequestHeaders.Add("Accept-Version", "v1");
+    }
+);
+builder.Services.AddScoped<UnsplashClient>();
 
 var app = builder.Build();
 
@@ -26,39 +40,6 @@ app.UseHttpsRedirection();
 
 app.MapGet("/", () => "hello");
 
-app.MapGet(
-    "/photos",
-    async (PhotoDb db) =>
-    {
-        var photos = await db.Photos.ToListAsync();
-
-        return photos;
-    }
-);
-app.MapPut(
-    "/photo",
-    async (PhotoDb db, Photo photo) =>
-    {
-        await db.Photos.AddAsync(photo);
-        await db.SaveChangesAsync();
-
-        return Results.Ok($"Uploaded: {photo}");
-    }
-);
-app.MapDelete(
-    "/photo",
-    async (PhotoDb db, int id) =>
-    {
-        var photo = await db.Photos.FindAsync(id);
-        if (photo == null)
-        {
-            return Results.NotFound($"Photo with ID {id} not found.");
-        }
-
-        db.Photos.Remove(photo);
-        await db.SaveChangesAsync();
-        return Results.Ok($"Deleted photo with ID {id}");
-    }
-);
+app.MapPhotoEndpoints();
 
 app.Run();
