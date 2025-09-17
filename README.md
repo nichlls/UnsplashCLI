@@ -19,6 +19,8 @@ A command-line interface application for interacting with the Unsplash API (wip)
 
 ## Getting Started
 
+Either use the devcontainer or:
+
 1. Ensure you have .NET 8 SDK installed
 2. Configure your PostgreSQL connection string in `appsettings.Development.json`
 3. Run the application with `dotnet run`
