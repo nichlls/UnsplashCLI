@@ -11,7 +11,8 @@
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				"csharpier.csharpier-vscode"
+				"csharpier.csharpier-vscode",
+				"zerefdev.todo-highlighter"
 			]
 		}
 	},

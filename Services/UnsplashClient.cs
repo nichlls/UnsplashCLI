@@ -8,6 +8,8 @@ namespace UnsplashCLI.Services;
 public class UnsplashClient
 {
     private readonly IHttpClientFactory _httpClientFactory;
+
+    // TODO: Implement configuration (appsettings/)
     private readonly IConfiguration _configuration;
 
     public UnsplashClient(IHttpClientFactory httpClientFactory, IConfiguration configuration)
@@ -18,6 +20,7 @@ public class UnsplashClient
 
     public async Task<UnsplashPhoto?> GetRandomPhotoAsync(string? accessKeyFromQuery)
     {
+        // TODO: Use configuration
         var key = accessKeyFromQuery;
         if (string.IsNullOrWhiteSpace(key))
         {
