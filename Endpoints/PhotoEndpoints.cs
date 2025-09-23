@@ -50,7 +50,7 @@ public static class PhotoEndpoints
                 var toSave = new Photo
                 {
                     Name = response.Description ?? response.AltDescription,
-                    Author = response.User?.Name ?? response.User?.Username ?? "unknown",
+                    Author = response.User?.Name ?? response.User?.Username ?? "Unknown author",
                     ImageURL =
                         response.Urls?.Regular ?? response.Urls?.Full ?? response.Urls?.Small,
                 };
