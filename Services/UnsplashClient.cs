@@ -1,4 +1,3 @@
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using UnsplashCLI.Models.Unsplash;
@@ -7,46 +6,40 @@ namespace UnsplashCLI.Services;
 
 public class UnsplashClient
 {
-    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly HttpClient _client;
 
-    // TODO: Implement configuration (appsettings/)
-    private readonly IConfiguration _configuration;
-
-    public UnsplashClient(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+    public UnsplashClient(IHttpClientFactory httpClientFactory)
     {
-        _httpClientFactory = httpClientFactory;
-        _configuration = configuration;
+        _client = httpClientFactory.CreateClient("Unsplash");
     }
 
-    public async Task<UnsplashPhoto?> GetRandomPhotoAsync(string? accessKeyFromQuery)
+    public async Task<UnsplashPhoto> GetRandomPhotoAsync()
     {
-        // TODO: Use configuration
-        var key = accessKeyFromQuery;
-        if (string.IsNullOrWhiteSpace(key))
+        try
         {
-            return null;
+            using var response = await _client.GetAsync("photos/randoms");
+            response.EnsureSuccessStatusCode();
+
+            var stream = await response.Content.ReadAsStreamAsync();
+            var photo = await JsonSerializer.DeserializeAsync<UnsplashPhoto>(stream, _jsonOptions);
+
+            if (photo == null)
+            {
+                throw new InvalidOperationException("Deserialisation returned null.");
+            }
+
+            return photo;
         }
-
-        var client = _httpClientFactory.CreateClient("Unsplash");
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
-            "Client-ID",
-            key
-        );
-
-        using var response = await client.GetAsync("photos/random");
-        if (!response.IsSuccessStatusCode)
+        catch (Exception ex)
         {
-            var error = await response.Content.ReadAsStringAsync();
-            Console.Error.WriteLine($"Unsplash API error: {response.StatusCode} - {error}");
-            return null;
+            // TODO: Handle this properly
+            throw new Exception(ex.Message);
         }
-
-        using var stream = await response.Content.ReadAsStreamAsync();
-        var photo = await JsonSerializer.DeserializeAsync<UnsplashPhoto>(
-            stream,
-            new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
-        );
-
-        return photo;
     }
+
+    // Create json options, to so only once instance is created
+    private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions()
+    {
+        PropertyNameCaseInsensitive = true,
+    };
 }

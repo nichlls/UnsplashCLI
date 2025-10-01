@@ -39,9 +39,9 @@ public static class PhotoEndpoints
         // Usage: POST /unsplash/import-random?accessKey=ACCESS_KEY
         app.MapPost(
             "/unsplash/import-random",
-            async (PhotoDb db, UnsplashClient unsplash, string? accessKey) =>
+            async (PhotoDb db, UnsplashClient unsplash) =>
             {
-                var response = await unsplash.GetRandomPhotoAsync(accessKey);
+                var response = await unsplash.GetRandomPhotoAsync();
                 if (response == null)
                 {
                     return Results.Problem("Failed to fetch random photo from Unsplash.");
