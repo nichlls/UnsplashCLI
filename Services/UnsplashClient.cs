@@ -17,7 +17,7 @@ public class UnsplashClient
     {
         try
         {
-            using var response = await _client.GetAsync("photos/randoms");
+            using var response = await _client.GetAsync("photos/random");
             response.EnsureSuccessStatusCode();
 
             var stream = await response.Content.ReadAsStreamAsync();
@@ -34,6 +34,58 @@ public class UnsplashClient
         {
             // TODO: Handle this properly
             throw new Exception(ex.Message);
+        }
+    }
+
+    public async Task<List<UnsplashPhoto>> SearchPhotosAsync(
+        string query,
+        int page = 1,
+        int perPage = 10
+    )
+    {
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            throw new ArgumentException("Search query cannot be null or empty.", nameof(query));
+        }
+
+        if (perPage < 1 || perPage > 30)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(perPage),
+                "perPage must be between 1 and 30."
+            );
+        }
+
+        try
+        {
+            // Build query string
+            var url =
+                $"search/photos?query={Uri.EscapeDataString(query)}&page={page}&per_page={perPage}";
+            using var response = await _client.GetAsync(url);
+            response.EnsureSuccessStatusCode();
+
+            var stream = await response.Content.ReadAsStreamAsync();
+            var searchResult = await JsonSerializer.DeserializeAsync<UnsplashSearchResult>(
+                stream,
+                _jsonOptions
+            );
+
+            return searchResult?.Results ?? new List<UnsplashPhoto>();
+        }
+        catch (HttpRequestException ex)
+        {
+            throw new Exception($"Failed to search photos from Unsplash API: {ex.Message}", ex);
+        }
+        catch (JsonException ex)
+        {
+            throw new Exception(
+                $"JSON deserialization error while searching photos: {ex.Message}",
+                ex
+            );
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Unexpected error searching photos: {ex.Message}", ex);
         }
     }
 
