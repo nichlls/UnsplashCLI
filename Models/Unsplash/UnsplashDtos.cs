@@ -9,6 +9,13 @@ public class UnsplashPhoto
     public UnsplashUrls? Urls { get; set; }
 }
 
+public class UnsplashSearchResult
+{
+    public int Total { get; set; }
+    public int TotalPages { get; set; }
+    public List<UnsplashPhoto>? Results { get; set; }
+}
+
 public class UnsplashUser
 {
     public string? Name { get; set; }
